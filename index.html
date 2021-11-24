@@ -70,7 +70,7 @@
           <span class="form-message"></span>
         </div>
         <div class="btn-wrap">
-          <button class="btn btn-submit" type="button" onclick="search()">検索</button>
+          <button class="btn btn-submit" onclick="search(event)">検索</button>
           <button class="btn btn-clear" type="button" onclick="clearSearchData()">削除</button>
         </div>
 
@@ -119,10 +119,12 @@
                   }
                 });
               }
+              clearForm();
               return;
             }
             usersData.push(data);
             saveData(usersData);
+            clearForm();
           }
         },
       });
@@ -132,7 +134,8 @@
         localStorage.setItem("storage_data", JSON.stringify(data));
       }
 
-      function search() {
+      function search(e) {
+        e.preventDefault();
         let html = "";
         let searchId = document.querySelector("#searchId").value;
         const usersData = JSON.parse(localStorage.getItem("storage_data"));
