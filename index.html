@@ -164,20 +164,17 @@
       };
 
       const clearForm = () => {
-        const confirm = window.confirm("データを削除しますか？");
-        if (confirm) {
-          document.getElementById("id").value = "";
-          document.getElementById("lastname").value = "";
-          document.getElementById("firstname").value = "";
-          document.getElementById("katafirstname").value = "";
-          document.getElementById("katalastname").value = "";
-          document.getElementById("address").value = "";
-          document.getElementById("phone").value = "";
-        }
+        document.getElementById("id").value = "";
+        document.getElementById("lastname").value = "";
+        document.getElementById("firstname").value = "";
+        document.getElementById("katafirstname").value = "";
+        document.getElementById("katalastname").value = "";
+        document.getElementById("address").value = "";
+        document.getElementById("phone").value = "";
       };
 
       const clearSearchData = () => {
-        const confirm = window.confirm("データを削除しますか？");
+        const confirm = window.confirm("画面表示のデータを削除しますか？");
         if (confirm) {
           document.getElementById("searchId").value = "";
           document.querySelector(".data .id").textContent = "";
