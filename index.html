@@ -1,0 +1,192 @@
+<!DOCTYPE html>
+<html lang="en">
+  <head>
+    <meta charset="UTF-8" />
+    <meta http-equiv="X-UA-Compatible" content="IE=edge" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>Document</title>
+    <link rel="stylesheet" href="./main.css" />
+  </head>
+
+  <body>
+    <div class="main">
+      <form action="" method="POST" class="form" id="form-1">
+        <h3 class="heading">社員登録プログラム</h3>
+        <div class="spacer"></div>
+
+        <div class="form-group">
+          <label for="id" class="form-label"> 社員番号 </label>
+          <input type="text" name="id" id="id" class="form-control" />
+          <span class="form-message"></span>
+        </div>
+
+        <div class="form-group">
+          <label for="lastname" class="form-label"> 姓（漢字） </label>
+          <input type="text" name="lastname" id="lastname" class="form-control" />
+          <span class="form-message"></span>
+        </div>
+        <div class="form-group">
+          <label for="firstname" class="form-label"> 名（漢字） </label>
+          <input type="text" name="firstname" id="firstname" class="form-control" />
+          <span class="form-message"></span>
+        </div>
+
+        <div class="form-group">
+          <label for="katalastname" class="form-label"> 氏名（半角カナ） </label>
+          <input type="text" name="katalastname" id="katalastname" class="form-control" />
+          <span class="form-message"></span>
+        </div>
+
+        <div class="form-group">
+          <label for="katafirstname" class="form-label"> 氏名（半角カナ） </label>
+          <input type="text" name="katafirstname" id="katafirstname" class="form-control" />
+          <span class="form-message"></span>
+        </div>
+
+        <div class="form-group">
+          <label for="address" class="form-label"> 住所 </label>
+          <input type="text" name="address" id="address" class="form-control" />
+          <span class="form-message"></span>
+        </div>
+
+        <div class="form-group">
+          <label for="phone" class="form-label"> 電話番号 </label>
+          <input type="text" name="phone" id="phone" class="form-control" />
+          <span class="form-message"></span>
+        </div>
+
+        <div class="btn-wrap">
+          <button class="btn btn-submit">登録</button>
+          <button class="btn btn-clear" type="button" onclick="clearForm()">クリアー</button>
+        </div>
+      </form>
+
+      <form action="" class="form" id="form-2">
+        <h3 class="heading">社員一覧</h3>
+        <div class="spacer"></div>
+        <div class="form-group">
+          <label for="searchId" class="form-label"> 社員番号 </label>
+          <input type="text" name="searchId" id="searchId" class="form-control" />
+          <span class="form-message"></span>
+        </div>
+        <div class="btn-wrap">
+          <button class="btn btn-submit" type="button" onclick="search()">検索</button>
+          <button class="btn btn-clear" type="button" onclick="clearSearchData()">削除</button>
+        </div>
+
+        <div class="data"></div>
+      </form>
+    </div>
+    <script src="./vadilation.js"></script>
+    <script>
+      const usersData = JSON.parse(localStorage.getItem("storage_data")) || [];
+      Validator({
+        form: "#form-1",
+        formGroupSelector: ".form-group",
+        errorSelector: ".form-message",
+        rules: [
+          Validator.isRequired("#lastname", "必須です、入力してください"),
+          Validator.isRequired("#firstname", "必須です、入力してください"),
+          Validator.isHangaku("#katalastname", "半角で入力してください"),
+          Validator.isHangaku("#katafirstname", "半角で入力してください"),
+          Validator.isId("#id"),
+          Validator.isPhoneNumber("#phone"),
+        ],
+
+        onSubmit: function (data) {
+          // save to local storage
+          const confirm = window.confirm("データを保存しましすか？");
+          if (confirm) {
+            if (usersData.length) {
+              const dataFilters = usersData.filter(userData => userData.id === data.id);
+
+              if (dataFilters.length === 0) {
+                usersData.push(data);
+                saveData(usersData);
+              } else {
+                //update data
+                usersData.forEach(user => {
+                  if (user.id === data.id) {
+                    user.lastname = data.lastname;
+                    user.firstname = data.firstname;
+                    user.firstname = data.firstname;
+                    user.katalastname = data.katalastname;
+                    user.katafirstname = data.katafirstname;
+                    user.address = data.address;
+                    user.phone = data.phone;
+                    saveData(usersData);
+                    return;
+                  }
+                });
+              }
+              return;
+            }
+            usersData.push(data);
+            saveData(usersData);
+          }
+        },
+      });
+
+      // save data to local storage
+      function saveData(data) {
+        localStorage.setItem("storage_data", JSON.stringify(data));
+      }
+
+      function search() {
+        let html = "";
+        let searchId = document.querySelector("#searchId").value;
+        const usersData = JSON.parse(localStorage.getItem("storage_data"));
+        usersData.map(userData => {
+          let phoneFormated = formatPhoneNumber(userData.phone);
+          if (userData.id.includes(searchId) && searchId !== "") {
+            html += `<div class="id">社員番号: ${userData.id}</div>
+                    <div class="fullname">氏名（漢字: ${userData.lastname} ${userData.firstname}</div>
+                    <div class="katakana">氏名（半角カナ: ${userData.katalastname} ${userData.katafirstname}</div>
+                    <div class="address">住所: ${userData.address}</div>
+                    <div class="phone">電話番号: ${phoneFormated}</div>`;
+          } else {
+            document.querySelector(".data").innerHTML = "";
+          }
+          document.querySelector(".data").innerHTML = html;
+        });
+      }
+
+      // create function clear form
+      const formatPhoneNumber = str => {
+        let cleaned = ("" + str).replace(/\D/g, "");
+        let match =
+          cleaned.match(/^(\d{2})(\d{4})(\d{4})$/) || cleaned.match(/^(\d{3})(\d{4})(\d{4})$/);
+        if (match) {
+          return match[1] + "-" + match[2] + "-" + match[3];
+        }
+        isId;
+        return null;
+      };
+
+      const clearForm = () => {
+        const confirm = window.confirm("データを削除しますか？");
+        if (confirm) {
+          document.getElementById("id").value = "";
+          document.getElementById("lastname").value = "";
+          document.getElementById("firstname").value = "";
+          document.getElementById("katafirstname").value = "";
+          document.getElementById("katalastname").value = "";
+          document.getElementById("address").value = "";
+          document.getElementById("phone").value = "";
+        }
+      };
+
+      const clearSearchData = () => {
+        const confirm = window.confirm("データを削除しますか？");
+        if (confirm) {
+          document.getElementById("searchId").value = "";
+          document.querySelector(".data .id").textContent = "";
+          document.querySelector(".data .fullname").textContent = "";
+          document.querySelector(".data .katakana").textContent = "";
+          document.querySelector(".data .address").textContent = "";
+          document.querySelector(".data .phone").textContent = "";
+        }
+      };
+    </script>
+  </body>
+</html>
